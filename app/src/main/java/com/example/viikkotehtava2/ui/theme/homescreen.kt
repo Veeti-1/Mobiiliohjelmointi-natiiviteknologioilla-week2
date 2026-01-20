@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -45,66 +46,76 @@ fun viewModelHomeScreen(viewModel: TaskViewModel = viewModel()) {
 
 
         }
-        viewModel.tasks.forEach { task ->
+        LazyColumn() {  viewModel.tasks.forEach { task ->
 
-            Row {
-                Text(
-                    text = "Title: ${task.title}",
+            item {
+                Row() {
+                    Text(
+                        text = "Title: ${task.title}",
 
-                    modifier = Modifier.padding(horizontal = 15.dp, vertical = 20.dp)
-                )
-                var check : Boolean
-                if(task.done){
-                    check = true
-                }else{
-                    check = false
-                }
-                Button(onClick = {
-                    viewModel.removeTask(task.id)
-                    println("id: "+task.id)})
-                { Text(text = "Remove") }
-                Button(onClick = { viewModel.toggleDone(task.id) }) {
-                    if (!task.done) {
-                        Text(text = "Done")
+                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 20.dp)
+                    )
+                    var check: Boolean
+                    if (task.done) {
+                        check = true
                     } else {
-                        Text(text = "undo")
+                        check = false
                     }
+                    Button(onClick = {
+                        viewModel.removeTask(task.id)
+                        println("id: " + task.id)
+                    })
+                    { Text(text = "Remove") }
+                    Button(onClick = { viewModel.toggleDone(task.id) }) {
+                        if (!task.done) {
+                            Text(text = "Done")
+                        } else {
+                            Text(text = "undo")
+                        }
+                    }
+                    Checkbox(
+                        checked = check,
+                        onCheckedChange = null,
+                        modifier = Modifier.padding(top = 14.dp)
+                    )
                 }
-                Checkbox(checked=check,
-                    onCheckedChange = null,
-                    modifier = Modifier.padding(top = 14.dp)
-                )
+
 
             }
         }
+            item {
+                Row(modifier = Modifier.padding(horizontal = 15.dp, vertical = 20.dp)) {
+                    var text by remember { mutableStateOf("Title") }
+                    TextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        label = { ("Title") },
+                        modifier = Modifier.width(200.dp).height(50.dp),
 
-        Row(modifier = Modifier.padding(horizontal = 15.dp, vertical = 20.dp)) {
-            var text by remember {mutableStateOf("Title")}
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { ("Title") },
-                modifier = Modifier.width(200.dp).height(50.dp),
 
+                        )
+                    Button(onClick = {
 
-                )
-            Button(onClick = {
+                        val nextid = (viewModel.tasks.maxOfOrNull { it.id } ?: 0) + 1
+                        val newTask = Task(
+                            id = nextid,
+                            title = "${text} ${nextid}",
+                            description = "added a new task via button",
+                            priority = (1..5).random(),
+                            dueDate = "2026-1-6",
+                            done = false,
+                        )
 
-                val nextid = (viewModel.tasks.maxOfOrNull { it.id }?:0)+1
-                val newTask = Task(
-                    id = nextid,
-                    title = "${text} ${nextid}",
-                    description = "added a new task via button",
-                    priority = (1..5).random(),
-                    dueDate = "2026-1-6",
-                    done = false,
-                )
+                        viewModel.addTask(newTask)
+                        println("id" + nextid)
+                    }) { Text(text = "add task") }
+                }
+            }
+            }
 
-                viewModel.addTask(newTask)
-                println("id"+nextid)
-            }) { Text(text = "add task") }
         }
-    }
+
+
 }
 
 
